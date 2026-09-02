@@ -1,0 +1,10 @@
+.DS_Store
+*.pdf
+*.docx
+*.zip
+work/
+tmp/
+outputs/
+references/private/
+__pycache__/
+*.pyc
