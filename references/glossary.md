@@ -5,7 +5,7 @@
 ## 使用规则
 
 - 首次出现的关键术语可写“中文（English）”，其后统一用中文。
-- 涉及训练／运行文体、进近、着陆、刹车、防滞、反推、滑跑道、侧风着陆或非正常机动时，先查 `fctm_zh_usage.md`；其中经双语对照的表达在同一技术语境下优先于本表一般条目。
+- 涉及训练／运行文体或飞行技术场景时，先用 `fctm_zh_usage.md` 判断并加载第 1—8 章相关场景模块；其中经双语对照的表达在同一技术语境下优先于本表一般条目。
 - `低/语境相关` 条目必须回看定义、受力对象、系统状态或操作阶段，并列入交付时的术语复核清单。
 - 驾驶舱固定标签、缩写和模式名称原则上保留英文；只有原文或适用的受控标准明确给出中文时才替换。
 - 新增术语必须记录英文、采用译法、语境、核验来源和把握度；用户未明确要求更新本 skill 时，只更新任务内术语表，不改本文件。
@@ -83,7 +83,7 @@
 | PIREP / PIREPS | 飞行员报告（PIREP/PIREPS） | 高；缩写单复数服从原文 |
 | autoland | 自动着陆 | 高 |
 | standing water | 积水 | 高 |
-| slush | 湿雪／雪浆 | 语境相关；双语资料与行业材料可能并行使用，须按当前来源统一 |
+| slush | 雪浆；个别段落作“湿雪” | 语境相关；优先与 `wet snow` 的“湿雪”区分，校订既有译稿时报告来源内部不一致 |
 | hydroplaning | 滑水 | 高 |
 | viscous hydroplaning | 粘性滑水 | 高；与动态滑水、橡胶回熔滑水区分 |
 | dynamic hydroplaning | 动态滑水 | 高；不使用“动力滑水” |
@@ -134,7 +134,7 @@
 | English | 中文 | 把握度／语境说明 |
 |---|---|---|
 | design maneuvering speed (Va) | 设计机动速度（Va） | 高 |
-| maximum operating speed (Vmo/Mmo) | 最大使用速度（Vmo/Mmo） | 高 |
+| maximum operating speed (VMO/MMO) | 最大使用速度（VMO/MMO） | 高 |
 | design dive speed (Vd/Md) | 设计俯冲速度（Vd/Md） | 高 |
 | turbulent air penetration speed | 颠簸穿越速度 | 中；按手册现行中文用语复核 |
 | flap placard speed | 襟翼标牌速度 | 中 |

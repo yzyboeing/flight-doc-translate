@@ -11,11 +11,60 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN_SUFFIXES = {".pdf", ".docx", ".zip"}
 ABSOLUTE_LOCAL_PATH = re.compile(r"/(?:Users|home)/[^\s`\"']+")
+FORBIDDEN_IDENTITY = re.compile(
+    "\u6df1\u5733\u822a\u7a7a|\u6df1\u822a|Shenzhen\\s+Airlines|AirDrop" + "Manual",
+    re.IGNORECASE,
+)
+EXPECTED_TOPIC_MODULES = {
+    "chapter_1_general_information.md": 45,
+    "chapter_2_ground_operations.md": 40,
+    "chapter_3_takeoff_initial_climb.md": 50,
+    "chapter_4_climb_cruise_descent_holding.md": 45,
+    "chapter_5_approach_missed_approach.md": 60,
+    "chapter_6_landing.md": 120,
+    "chapter_7_maneuvers.md": 50,
+    "chapter_8_non_normal_operations.md": 70,
+}
+
+
+def reference_markdown() -> list[Path]:
+    return sorted((ROOT / "references").rglob("*.md"))
+
+
+def terminology_sources() -> list[Path]:
+    return [
+        ROOT / "references" / "glossary.md",
+        ROOT / "references" / "fctm_zh_usage.md",
+        *sorted((ROOT / "references" / "fctm_topics").glob("*.md")),
+    ]
+
+
+def topic_module_completeness() -> list[str]:
+    problems: list[str] = []
+    topic_dir = ROOT / "references" / "fctm_topics"
+    actual = {path.name for path in topic_dir.glob("*.md")}
+    expected = set(EXPECTED_TOPIC_MODULES)
+    for name in sorted(expected - actual):
+        problems.append(f"missing FCTM topic module: {name}")
+    for name in sorted(actual - expected):
+        problems.append(f"unexpected FCTM topic module: {name}")
+    for name, minimum_rows in EXPECTED_TOPIC_MODULES.items():
+        path = topic_dir / name
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for heading in ("## 适用场景", "## 高频句式框架", "## 易混边界"):
+            if heading not in text:
+                problems.append(f"missing section in {name}: {heading}")
+        row_count = len(table_rows(path))
+        if row_count < minimum_rows:
+            problems.append(f"too few terminology rows in {name}: {row_count} < {minimum_rows}")
+    return problems
 
 
 def markdown_links() -> list[str]:
     problems: list[str] = []
-    for source in [ROOT / "SKILL.md", *sorted((ROOT / "references").glob("*.md"))]:
+    for source in [ROOT / "README.md", ROOT / "SKILL.md", *reference_markdown()]:
         text = source.read_text(encoding="utf-8")
         for link in re.findall(r"\[[^\]]+\]\(([^)]+\.md)\)", text):
             if not (source.parent / link).resolve().exists():
@@ -34,6 +83,9 @@ def public_content() -> list[str]:
         match = ABSOLUTE_LOCAL_PATH.search(text)
         if match:
             problems.append(f"local path in {path.relative_to(ROOT)}: {match.group(0)}")
+        identity = FORBIDDEN_IDENTITY.search(text)
+        if identity:
+            problems.append(f"forbidden organization/source identity in {path.relative_to(ROOT)}: {identity.group(0)}")
     return problems
 
 
@@ -53,11 +105,11 @@ def table_rows(path: Path) -> list[tuple[str, str, int]]:
 
 
 def terminology_conflicts() -> list[str]:
-    sources = [ROOT / "references" / "glossary.md", ROOT / "references" / "fctm_zh_usage.md"]
+    sources = terminology_sources()
     index: dict[str, list[tuple[str, str, int]]] = defaultdict(list)
     for source in sources:
         for key, chinese, line in table_rows(source):
-            index[key].append((source.name, chinese, line))
+            index[key].append((str(source.relative_to(ROOT)), chinese, line))
 
     problems: list[str] = []
     for key, values in sorted(index.items()):
@@ -68,7 +120,7 @@ def terminology_conflicts() -> list[str]:
 
 
 def semantic_distinctions() -> list[str]:
-    sources = [ROOT / "references" / "glossary.md", ROOT / "references" / "fctm_zh_usage.md"]
+    sources = terminology_sources()
     translations: dict[str, str] = {}
     for source in sources:
         for key, chinese, _ in table_rows(source):
@@ -99,12 +151,18 @@ def semantic_distinctions() -> list[str]:
 
 
 def main() -> None:
-    problems = markdown_links() + public_content() + terminology_conflicts() + semantic_distinctions()
+    problems = (
+        topic_module_completeness()
+        + markdown_links()
+        + public_content()
+        + terminology_conflicts()
+        + semantic_distinctions()
+    )
     if problems:
         raise SystemExit("\n".join(problems))
     count = sum(
         len(table_rows(path))
-        for path in (ROOT / "references" / "glossary.md", ROOT / "references" / "fctm_zh_usage.md")
+        for path in terminology_sources()
     )
     print(f"package validation passed; terminology rows: {count}")
 

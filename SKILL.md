@@ -11,7 +11,7 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 
 1. 同时读取并遵守 `pdf` 与 `documents` skill；通过工作区依赖加载器取得当前 Node、Python、Poppler 与 Word 渲染工具路径，不依赖固定的 `/mnt/...` 路径。
 2. 保持源 PDF 不变；中间文件放任务工作目录，最终文件放用户可访问的 `outputs/`。
-3. 翻译前完整读取 [references/fidelity.md](references/fidelity.md) 与 [references/glossary.md](references/glossary.md)。涉及运行、训练、进近、复飞、拉平、接地、着陆滑跑、刹车、反推、滑跑道／污染跑道、侧风着陆或非正常机动时，还必须读取 [references/fctm_zh_usage.md](references/fctm_zh_usage.md)，按同一技术语境采用其中经过双语对照的中文表达。`fidelity.md` 优先于本文件其余要求。
+3. 翻译前完整读取 [references/fidelity.md](references/fidelity.md) 与 [references/glossary.md](references/glossary.md)。涉及运行、训练或飞行技术场景时，还必须读取 [references/fctm_zh_usage.md](references/fctm_zh_usage.md)：先根据材料内容和涉及范围判断飞行阶段，再按索引只加载第 1—8 章中相关的场景模块；跨阶段材料可加载多个模块，不因孤立词命中而加载无关章节。按相同技术对象、阶段和文体采用其中经过双语对照的中文表达。`fidelity.md` 优先于本文件其余要求。
 4. 用户明确要求打印、分发或供飞行员纸面学习时，再读取并执行 [references/printing.md](references/printing.md)。
 5. 用户同时提供英文源文与已有中文 `.docx` 并要求优化时，读取并执行 [references/revising_existing_translation.md](references/revising_existing_translation.md)。英文源文是技术事实依据，已有译稿只是待校订内容与版式基线。
 6. 若用户要求的是把中文个人笔记重新组织成复习材料，改用 `flight-theory-notes`；若输入是既有英文技术文档并要求中文化，继续使用本 skill。
@@ -81,8 +81,8 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 ## 翻译
 
 - 按原文顺序逐段处理，保留标题、列表、警告层级、图表编号、脚注、交叉引用、数字、符号、单位和缩写。
-- 术语与表达按以下优先级决策：英文源文含义和 `fidelity.md` 硬约束 → 用户对当前任务的明确选择 → 原文自身定义或同版双语对应 → `fctm_zh_usage.md` 的同语境表达 → `glossary.md` → 可核实的中国民航既定用语。FCTM 用法基准只能决定等义措辞，不能把其中的程序、数值、机型或适用条件补进待译文档。
-- 术语先查 `fctm_zh_usage.md` 和 `glossary.md`；没有条目时核验中国民航既定用语。仍无可靠译法时按上下文直译，首次出现保留英文，并列入“术语存疑清单”。不得编造标准译名。
+- 术语与表达按以下优先级决策：英文源文含义和 `fidelity.md` 硬约束 → 用户对当前任务的明确选择 → 原文自身定义或同版双语对应 → `fctm_zh_usage.md` 所路由场景模块的同语境表达 → `glossary.md` → 可核实的中国民航既定用语。FCTM 用法基准只能决定等义措辞，不能把其中的程序、数值、机型或适用条件补进待译文档。
+- 术语先查 `fctm_zh_usage.md` 路由到的场景模块和 `glossary.md`；没有条目时核验中国民航既定用语。仍无可靠译法时按上下文直译，首次出现保留英文，并列入“术语存疑清单”。不得编造标准译名。
 - FCTM 用法基准不是运行批准文件，也不自动适用于法规、事故报告或其他文体。若与待译原文发生技术或文体冲突，保留原文含义、情态和文体，并在确认关口报告。
 - 可在原有标题后附英文、在术语首次出现时附英文；不得新增原文没有的章节编号、概括标题、机理说明、数据或规则。
 - 原文明显疑似笔误时照原文翻译，并紧邻添加 `［译注］`，说明疑点与可核验来源；不得静默改正。
