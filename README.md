@@ -6,8 +6,10 @@
 
 - 默认双确认：先提交《初始翻译方案》，确认后执行；完成草稿和首轮视觉检查后，再进行终稿前确认。
 - 英文原文决定技术事实、条件、情态、数字和适用范围，不用术语库补写原文没有的内容。
+- 先识别 FCTM、QRH、FCOM、SOP、法规或事故调查等文档类型，再使用对应中文表达；不同文体不能相互强化或稀释。
 - 将 FCTM 第 1—8 章重构为八个场景模块，覆盖综合信息、地面操作、起飞和起始爬升、爬升／巡航／下降／等待、进近和复飞、着陆、机动飞行及非正常操作。
-- 翻译时根据材料内容和涉及范围按需加载相关模块，使用其中的高频术语、动作搭配、句式框架和易混边界；不会把无关章节或运行数值带入译文。
+- 将 QRH 表达按检查单结构及系统重构为六个模块，覆盖检查单字段、控制件状态、条件分支、机组协同和主要系统术语。
+- 翻译时根据材料内容和涉及范围按需加载相关模块，使用其中的高复用术语、动作搭配、句式框架和易混边界；不会把无关章节或运行数值带入译文。
 - 每份文档定稿并完成最终 QA 后，复盘术语、句式、歧义、版式和检查经验；只把经过验证、可复用且已脱敏的经验回写到 Skill，没有合格经验时不制造条目。
 - 保留原图、表格、警告层级、版权和出口管制标识，并对生成的 DOCX 做逐页渲染检查。
 - 区分航空技术文档翻译与中文个人学习笔记整理。
@@ -25,7 +27,20 @@
 7. [机动飞行](references/fctm_topics/chapter_7_maneuvers.md)
 8. [非正常操作](references/fctm_topics/chapter_8_non_normal_operations.md)
 
-每个模块包含适用场景、高频术语与搭配、短句式框架及易混边界。章号用于组织和检索，不表示其他待译材料必须采用相同章节结构。
+每个模块包含适用场景、高复用术语与搭配、短句式框架及易混边界。章号用于组织和检索，不表示其他待译材料必须采用相同章节结构。
+
+## QRH 检查单表达模块
+
+总入口是 [QRH 中文用法路由](references/qrh_zh_usage.md)。六个模块分别覆盖：
+
+1. [检查单结构与动作](references/qrh_topics/checklist_structure.md)
+2. [机体、气源、防冰和通讯](references/qrh_topics/airframe_air_anti_ice_communications.md)
+3. [电气、发动机、APU 和防火](references/qrh_topics/electrical_engines_apu_fire.md)
+4. [飞控、仪表和导航](references/qrh_topics/flight_controls_instruments_navigation.md)
+5. [燃油、液压、起落架和警告](references/qrh_topics/fuel_hydraulics_landing_gear_warnings.md)
+6. [性能和机动](references/qrh_topics/performance_and_maneuvers.md)
+
+来源分层见 [来源权威与文体路由](references/source_authority.md)，双语手册维护见 [手册导入流程](references/reference_ingestion.md)，稳定分歧见 [术语冲突与决策边界](references/terminology_conflicts.md)。
 
 ## 安装
 
@@ -33,6 +48,6 @@
 
 ## 内容边界
 
-仓库不包含任何源手册 PDF、连续手册正文、具体运行限制或组织身份信息。术语和短语仅用于提高翻译一致性，不构成现行程序、运行批准或机型资格依据。
+仓库不包含任何源手册 PDF、抽取文本、页面图像、连续手册正文、具体运行限制、内部编号、机号或组织身份信息。术语和短语仅用于提高翻译一致性，不构成现行程序、运行批准或机型资格依据。
 
 最终译文必须保留声明：**本译文未经技术复核，仅供学习参考，不得作为运行依据。**

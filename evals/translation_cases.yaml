@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "fctm_should_not_become_must",
+      "document_type": "FCTM",
+      "source": "X should be used when conditions permit.",
+      "expected": ["应", "条件允许"],
+      "forbidden": ["必须", "任何情况下"]
+    },
+    {
+      "id": "fctm_may_preserves_possibility",
+      "document_type": "FCTM",
+      "source": "X may result in Y.",
+      "expected": ["可能导致"],
+      "forbidden": ["必然导致", "将导致"]
+    },
+    {
+      "id": "qrh_condition_scope",
+      "document_type": "QRH",
+      "source": "If X: do Y. Otherwise: go to step Z.",
+      "expected": ["如果 X", "执行 Y", "否则", "转阅第 Z 步"],
+      "forbidden": ["始终执行 Y"]
+    },
+    {
+      "id": "qrh_choose_one_preserves_branches",
+      "document_type": "QRH",
+      "source": "Choose one: X is ON; X is OFF.",
+      "expected": ["选其一", "ON", "OFF"],
+      "forbidden": ["同时"]
+    },
+    {
+      "id": "qrh_confirm_is_not_plain_verify",
+      "document_type": "QRH",
+      "source": "Confirm X, then move X to Y.",
+      "expected": ["核实", "然后", "移至 Y"],
+      "forbidden": ["直接移至 Y"]
+    },
+    {
+      "id": "qrh_verify_state_not_action",
+      "document_type": "QRH",
+      "source": "Verify X is in the closed position.",
+      "expected": ["核实 X", "关位"],
+      "forbidden": ["将 X 移至关位"]
+    },
+    {
+      "id": "qrh_plan_to_land_strength",
+      "document_type": "QRH",
+      "source": "Plan to land at the nearest suitable airport.",
+      "expected": ["计划", "最近合适机场着陆"],
+      "forbidden": ["立即着陆"]
+    },
+    {
+      "id": "qrh_immediate_landing_strength",
+      "document_type": "QRH",
+      "source": "Land immediately.",
+      "expected": ["立即着陆"],
+      "forbidden": ["计划着陆", "尽快着陆"]
+    },
+    {
+      "id": "qrh_cockpit_label_preserved",
+      "document_type": "QRH",
+      "source": "MODE selector — MAN.",
+      "expected": ["选择器", "MAN"],
+      "forbidden": ["自动"]
+    },
+    {
+      "id": "indication_not_system_failure",
+      "document_type": "QRH",
+      "source": "X indication is inoperative.",
+      "expected": ["X 指示不工作"],
+      "forbidden": ["X 系统失效"]
+    },
+    {
+      "id": "completion_exception_preserved",
+      "document_type": "QRH",
+      "source": "Checklist Complete Except Deferred Items.",
+      "expected": ["除延迟项目外", "检查单完成"],
+      "forbidden": ["全部项目均已完成"]
+    },
+    {
+      "id": "cross_document_style_routing",
+      "document_type": "mixed",
+      "source": "The FCTM explains why; the QRH item specifies what to do.",
+      "expected": ["训练说明保持解释性", "检查单项目保持指令结构"],
+      "forbidden": ["用训练说明改写检查单动作"]
+    },
+    {
+      "id": "chinese_reference_cannot_add_fact",
+      "document_type": "revision",
+      "source": "The English source contains X; the Chinese reference contains X and Y.",
+      "expected": ["只保留 X", "Y 进入差异清单"],
+      "forbidden": ["把 Y 加入译文"]
+    },
+    {
+      "id": "qrh_layout_semantics",
+      "document_type": "QRH",
+      "source": "Control name ... target state ... crew responsibility; continued on next page.",
+      "expected": ["控制件", "目标状态", "机组责任", "下页续"],
+      "forbidden": ["合并为无结构段落"]
+    }
+  ]
+}

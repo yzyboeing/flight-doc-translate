@@ -150,7 +150,7 @@
 | overweight landing | 超重着陆 | 高 |
 | overweight autoland | 超重自动着陆 | 适用政策和批准状态由原文决定 |
 
-## 高频句式框架
+## 高复用句式框架
 
 | English pattern | 中文框架 | 控制点 |
 |---|---|---|

@@ -11,11 +11,16 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 
 1. 同时读取并遵守 `pdf` 与 `documents` skill；通过工作区依赖加载器取得当前 Node、Python、Poppler 与 Word 渲染工具路径，不依赖固定的 `/mnt/...` 路径。
 2. 保持源 PDF 不变；中间文件放任务工作目录，最终文件放用户可访问的 `outputs/`。
-3. 翻译前完整读取 [references/fidelity.md](references/fidelity.md) 与 [references/glossary.md](references/glossary.md)。涉及运行、训练或飞行技术场景时，还必须读取 [references/fctm_zh_usage.md](references/fctm_zh_usage.md)：先根据材料内容和涉及范围判断飞行阶段，再按索引只加载第 1—8 章中相关的场景模块；跨阶段材料可加载多个模块，不因孤立词命中而加载无关章节。按相同技术对象、阶段和文体采用其中经过双语对照的中文表达。`fidelity.md` 优先于本文件其余要求。
+3. 翻译前完整读取 [references/fidelity.md](references/fidelity.md)、[references/source_authority.md](references/source_authority.md) 与 [references/glossary.md](references/glossary.md)。先识别文档类型，再按需加载用法模块：
+   - FCTM、训练指导或飞行阶段叙述：读取 [references/fctm_zh_usage.md](references/fctm_zh_usage.md)，按内容只加载第 1—8 章相关场景模块；
+   - QRH、检查单、控制件—目标状态或非正常处置项目：读取 [references/qrh_zh_usage.md](references/qrh_zh_usage.md)，按系统和检查单功能只加载相关 QRH 模块；
+   - 同时涉及训练解释和检查单项目时可加载两类模块，但 QRH 动作、条件、分支和完成语句由 QRH 用法优先，FCTM 只提供等义的训练叙述表达。
+   跨阶段材料可加载多个模块，不因孤立词命中而加载无关章节。`fidelity.md` 始终具有最高内容优先级。
 4. 用户明确要求打印、分发或供飞行员纸面学习时，再读取并执行 [references/printing.md](references/printing.md)。
 5. 用户同时提供英文源文与已有中文 `.docx` 并要求优化时，读取并执行 [references/revising_existing_translation.md](references/revising_existing_translation.md)。英文源文是技术事实依据，已有译稿只是待校订内容与版式基线。
 6. 若用户要求的是把中文个人笔记重新组织成复习材料，改用 `flight-theory-notes`；若输入是既有英文技术文档并要求中文化，继续使用本 skill。
 7. 每份翻译或校订项目定稿后，必须读取并执行 [references/terminology_maintenance.md](references/terminology_maintenance.md) 的“单文档经验回写闭环”：复盘本次术语、句式、歧义、版式与 QA 经验，只把经过验证、可复用、已脱敏且能改变后续翻译决策的内容更新到本 skill。不得把源手册、连续正文、运行限制或组织身份信息写入可公开发布的 skill；没有合格的新经验时不得为了留下改动而制造条目。
+8. 用户提供双语或中文手册并要求完善本 skill 时，完整读取并执行 [references/reference_ingestion.md](references/reference_ingestion.md)。第一阶段只读审核后必须提交《Skill 优化方案》并停止；收到明确确认后才能写入、验证或发布。中文运营人表达只按 [references/operator_zh_style.md](references/operator_zh_style.md) 的边界使用，冲突项查阅 [references/terminology_conflicts.md](references/terminology_conflicts.md)。
 
 ## 能力自检与路线声明
 
@@ -81,9 +86,9 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 ## 翻译
 
 - 按原文顺序逐段处理，保留标题、列表、警告层级、图表编号、脚注、交叉引用、数字、符号、单位和缩写。
-- 术语与表达按以下优先级决策：英文源文含义和 `fidelity.md` 硬约束 → 用户对当前任务的明确选择 → 原文自身定义或同版双语对应 → `fctm_zh_usage.md` 所路由场景模块的同语境表达 → `glossary.md` → 可核实的中国民航既定用语。FCTM 用法基准只能决定等义措辞，不能把其中的程序、数值、机型或适用条件补进待译文档。
-- 术语先查 `fctm_zh_usage.md` 路由到的场景模块和 `glossary.md`；没有条目时核验中国民航既定用语。仍无可靠译法时按上下文直译，首次出现保留英文，并列入“术语存疑清单”。不得编造标准译名。
-- FCTM 用法基准不是运行批准文件，也不自动适用于法规、事故报告或其他文体。若与待译原文发生技术或文体冲突，保留原文含义、情态和文体，并在确认关口报告。
+- 术语与表达按 [references/source_authority.md](references/source_authority.md) 的技术事实链和中文措辞链决策：英文源文含义和 `fidelity.md` 硬约束 → 用户对当前任务的等义选择 → 同修订同章节双语对应 → 同文档类型模块 → 同场景其他文档类型模块 → `glossary.md` → 可核实的中国民航既定用语。任何用法基准都不能把程序、数值、机型或适用条件补进待译文档。
+- 术语先查与当前文档类型相符的路由模块和 `glossary.md`；检查单语言优先查 `qrh_zh_usage.md`，训练叙述优先查 `fctm_zh_usage.md`。没有条目时核验中国民航既定用语。仍无可靠译法时按上下文直译，首次出现保留英文，并列入“术语存疑清单”。不得编造标准译名。
+- FCTM 和 QRH 用法基准都不是运行批准文件，也不自动适用于法规、事故报告或其他文体。若与待译原文发生技术或文体冲突，保留原文含义、情态和文体，并在确认关口报告。
 - 可在原有标题后附英文、在术语首次出现时附英文；不得新增原文没有的章节编号、概括标题、机理说明、数据或规则。
 - 原文明显疑似笔误时照原文翻译，并紧邻添加 `［译注］`，说明疑点与可核验来源；不得静默改正。
 - 对 WARNING、CAUTION、NOTE 及 may/should/must 等情态逐项复核。完成每一章后做英中对照复核，再进行全文数字、单位、图号、表号和术语一致性复核。
@@ -133,16 +138,16 @@ FONTCONFIG_FILE="$PWD/work/fonts.conf" python <documents-skill>/render_docx.py o
 
 本流程可以约束来源忠实性、术语一致性和版式检查，但不能保证发现原文内部矛盾、跨章节错引或专业判断错误。检查清单只能证明执行了核对动作，不能替代人工技术复核；不得给出未经代表性实测支持的固定准确率或“已达到培训资料标准”等结论。
 
-术语库和场景表达只提高翻译一致性，不构成机型资格、运行批准或现行程序依据。公开发布本 skill 时只发布工作流、短术语和抽象句式；任何源 PDF、连续手册正文、具体运行限制、组织名称和可识别内部信息都必须排除。
+术语库和场景表达只提高翻译一致性，不构成机型资格、运行批准或现行程序依据。公开发布本 skill 时只发布工作流、短术语和抽象句式；任何源 PDF、抽取文本、页面图像、连续手册正文、具体运行限制、组织名称、内部编号、机号和可识别内部信息都必须排除。
 
 ## 单文档经验回写
 
 每份文档完成定稿和最终 QA 后、结束任务前，执行术语维护文件中的闭环，并在交付说明中报告：本次新增或修订了哪些可复用规则、更新到哪个场景模块、验证是否通过；若没有符合条件的新经验，明确写“本次无适合沉淀到 Skill 的新条目”。
 
 - 回写必须发生在译文定稿之后，不得绕过初始方案或终稿前确认，也不得用回写结果静默改变用户已经确认的本次终稿。
-- 可回写内容包括：稳定术语对应、反复出现的动作搭配、情态或条件翻译边界、真实发生的版式处理规则，以及能够防止同类错误的 QA 检查。
+- 可回写内容包括：稳定术语对应、反复出现的动作搭配、情态或条件翻译边界、真实发生的版式处理规则，以及能够防止同类错误的 QA 检查。写入前必须标明文档类型；QRH 经验进入 QRH 路由，FCTM 经验进入相应飞行阶段模块，跨文体通用项才进入 `glossary.md`。
 - 单一文件特有的事实、数值、程序、长句、图表内容、组织身份、内部路径、文件哈希和未经证实的候选译法不得进入默认规则。
-- 低把握度、来源冲突或只出现一次且影响较大的译法，只能记录为候选或冲突并保留确认关口，不能提升为默认首选。
+- 低把握度、来源冲突或只出现一次且影响较大的译法，只能记录为风格候选或冲突并保留确认关口，不能提升为默认首选。
 - 更新后必须运行 skill 结构验证、公开内容检查、术语冲突检查和与改动相关的代表性行为检查；任何一项失败都不得把更新称为完成。
 - 已有用户指定的持续维护仓库时，只同步通过公开性检查的抽象规则和短表达；没有明确的持续发布授权时，不得把本地回写自动外推到外部仓库。
 
