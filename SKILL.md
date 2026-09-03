@@ -11,7 +11,7 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 
 1. 同时读取并遵守 `pdf` 与 `documents` skill；通过工作区依赖加载器取得当前 Node、Python、Poppler 与 Word 渲染工具路径，不依赖固定的 `/mnt/...` 路径。
 2. 保持源 PDF 不变；中间文件放任务工作目录，最终文件放用户可访问的 `outputs/`。
-3. 翻译前完整读取 [references/fidelity.md](references/fidelity.md)、[references/source_authority.md](references/source_authority.md) 与 [references/glossary.md](references/glossary.md)。先识别文档类型，再按需加载用法模块：
+3. 翻译前完整读取 [references/fidelity.md](references/fidelity.md)、[references/standing_decisions.md](references/standing_decisions.md)、[references/source_authority.md](references/source_authority.md) 与 [references/glossary.md](references/glossary.md)。`standing_decisions.md` 保存跨文档长期有效的用户决策，其中已有结论的问题不得在任何确认关口重复提问。先识别文档类型，再按需加载用法模块：
    - FCTM、训练指导或飞行阶段叙述：读取 [references/fctm_zh_usage.md](references/fctm_zh_usage.md)，按内容只加载第 1—8 章相关场景模块；
    - QRH、检查单、控制件—目标状态或非正常处置项目：读取 [references/qrh_zh_usage.md](references/qrh_zh_usage.md)，按系统和检查单功能只加载相关 QRH 模块；
    - 同时涉及训练解释和检查单项目时可加载两类模块，但 QRH 动作、条件、分支和完成语句由 QRH 用法优先，FCTM 只提供等义的训练叙述表达。
@@ -67,7 +67,7 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 - 原文黑白时使用 `scripts/style_mono.js`，不得新增彩色强调。
 - 原文彩色时先运行 `scripts/sample_colors.py`，再用采样结果配置 `scripts/style_boeing.js`；未配置采样色值时彩色样式模块会拒绝工作。
 - 正文一律单栏。保留信息结构、层级、图表次序和原有视觉语义，但不为追求页数一致而压缩字号或改变内容。
-- A4 是印刷译本默认；只有明确还原北美原版页面尺寸时用 Letter。
+- 所有译本一律使用 A4，即使原文为 Letter（SD-1）。不再询问纸张尺寸；Letter 原文转 A4 造成的行宽与分页变化按版式偏离在对话交付说明中报告。
 
 ## 插图与表格
 
@@ -90,7 +90,7 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 - 术语先查与当前文档类型相符的路由模块和 `glossary.md`；检查单语言优先查 `qrh_zh_usage.md`，训练叙述优先查 `fctm_zh_usage.md`。没有条目时核验中国民航既定用语。仍无可靠译法时按上下文直译，首次出现保留英文，并列入“术语存疑清单”。不得编造标准译名。
 - FCTM 和 QRH 用法基准都不是运行批准文件，也不自动适用于法规、事故报告或其他文体。若与待译原文发生技术或文体冲突，保留原文含义、情态和文体，并在确认关口报告。
 - 可在原有标题后附英文、在术语首次出现时附英文；不得新增原文没有的章节编号、概括标题、机理说明、数据或规则。
-- 原文明显疑似笔误时照原文翻译，并紧邻添加 `［译注］`，说明疑点与可核验来源；不得静默改正。
+- 原文明显疑似笔误时照原文翻译，按 SD-3 **不在正文添加 `［译注］`**；把疑点、可核验来源与处理方式写入终稿前确认关口和交付说明的「原文疑点清单」。不得静默改正，也不得因为不加译注就省略报告。
 - 对 WARNING、CAUTION、NOTE 及 may/should/must 等情态逐项复核。完成每一章后做英中对照复核，再进行全文数字、单位、图号、表号和术语一致性复核。
 - 中文排版统一使用全角斜杠“／”与中文破折号“——”；图号、表号写作“图 1”“表 1”。英文缩写首次出现时给出中文全称并保留缩写。引号只做字符样式转换，不改变引文内容或范围。
 
@@ -106,7 +106,7 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
   S.configure({ primary: '#原文采样色', secondary: '#原文采样色' });
   ```
 
-- `page_setup.js` 提供 A4/Letter 页面、装订边、页脚、复核横幅、版本块与目录组件。需要双面镜像页边距时，在 `Packer.toBuffer()` 后调用 `patchMirrorMargins(buffer)` 再写文件。
+- `page_setup.js` 提供 A4 页面、装订边、页脚与目录组件。页脚按原文还原（SD-2）；`buildFooter()`、复核状态横幅与版本块组件保留但默认不调用（SD-2、SD-4）。需要双面镜像页边距时，在 `Packer.toBuffer()` 后调用 `patchMirrorMargins(buffer)` 再写文件。
 - 正文西文 Times New Roman、中文宋体类、10.5 pt；彩色刊物可用 Segoe UI/微软雅黑类。脚本在 macOS 默认用 `Songti SC` 与 `Hiragino Sans GB` 以保证可渲染；目标环境有宋体/微软雅黑时可分别用 `FLIGHT_DOC_SERIF_CJK`、`FLIGHT_DOC_SANS_CJK` 指定。任何字体替代都要通过逐页渲染并记录。表格线 0.5 pt，黑白稿表头不加底纹。
 - `figure()` 与 `figCap()` 都设置 `keepNext`；两者之间不插入元素。图内标注对照表紧随图题。
 - 大于 6 列的宽表设置 `cantSplit: true`，必要时在原有表题段落使用 `pageBreakBefore: true`，但不得凭空创建表题。
@@ -119,7 +119,7 @@ description: 将 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 - 中文字体无方框或乱码，标题/正文无裁切、重叠或孤行；
 - 表格列宽、合并、跨页、重复表头和脚注正确；
 - 图像比例正确、清晰、无残余文字，图、图题、对照表关系清楚；
-- 页眉页脚、文档编号、复核状态、页码逐页可见；
+- 页眉页脚与原文一致，未新增原文没有的文档编号、复核状态或页码（SD-2）；
 - 黑白稿无新增颜色；彩色稿只使用已从原文确认的颜色；
 - 数字、单位、限制、WARNING/CAUTION/NOTE、图表编号及交叉引用与原文一致。
 
@@ -168,9 +168,9 @@ FONTCONFIG_FILE="$PWD/work/fonts.conf" python <documents-skill>/render_docx.py o
 1. `fidelity.md` 末尾清单的逐项结论；
 2. 版式偏离：单栏处理、页数变化、页面尺寸、无法重建的表格和图位变化；
 3. 术语存疑清单及建议核对的受控资料现行用语；
-4. 所有 `［译注］` 的位置和原因；
+4. 原文疑点清单：位置、疑点内容、可核验来源、处理方式（一律照译）；
 5. 机型适用性结论；
 6. 文档编号、日期、修订号和现行性核验边界；
 7. 版权/出口管制处理；
 8. 受限路线的环境限制：未生成 `.docx`、未提图或未完成视觉 QA 的具体项目；
-9. 最后原样写出：**本译文未经技术复核，仅供学习参考，不得作为运行依据。** “仅供学习参考”是附加用途说明，不能替代“未经技术复核”和“不得作为运行依据”。
+9. 最后在**对话交付说明中**原样写出：**本译文未经技术复核，仅供学习参考，不得作为运行依据。** “仅供学习参考”是附加用途说明，不能替代“未经技术复核”和“不得作为运行依据”。
