@@ -1,103 +1,195 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "evaluation_method": "Judge semantic invariants and failure conditions. Do not require exact wording.",
   "cases": [
     {
-      "id": "fctm_should_not_become_must",
+      "id": "fctm_should_preserve_recommendation",
       "document_type": "FCTM",
+      "coverage": ["modal_strength"],
+      "prompt": "Translate the source faithfully into Chinese.",
       "source": "X should be used when conditions permit.",
-      "expected": ["应", "条件允许"],
-      "forbidden": ["必须", "任何情况下"]
+      "pass_criteria": ["The recommendation strength and the condition are both preserved."],
+      "failure_conditions": ["The translation turns the recommendation into an unconditional requirement."]
     },
     {
-      "id": "fctm_may_preserves_possibility",
+      "id": "fctm_may_preserve_possibility",
       "document_type": "FCTM",
+      "coverage": ["modal_strength"],
+      "prompt": "Translate the source faithfully into Chinese.",
       "source": "X may result in Y.",
-      "expected": ["可能导致"],
-      "forbidden": ["必然导致", "将导致"]
+      "pass_criteria": ["The result remains possible rather than certain."],
+      "failure_conditions": ["The translation states that Y will or must occur."]
     },
     {
       "id": "qrh_condition_scope",
       "document_type": "QRH",
+      "coverage": ["qrh_branching"],
+      "prompt": "Translate the checklist item while preserving its branches.",
       "source": "If X: do Y. Otherwise: go to step Z.",
-      "expected": ["如果 X", "执行 Y", "否则", "转阅第 Z 步"],
-      "forbidden": ["始终执行 Y"]
+      "pass_criteria": ["Y remains governed only by X, and the otherwise branch still points to Z."],
+      "failure_conditions": ["Y becomes unconditional or the otherwise branch is lost."]
     },
     {
-      "id": "qrh_choose_one_preserves_branches",
+      "id": "qrh_choose_one",
       "document_type": "QRH",
+      "coverage": ["qrh_branching"],
+      "prompt": "Translate the checklist item.",
       "source": "Choose one: X is ON; X is OFF.",
-      "expected": ["选其一", "ON", "OFF"],
-      "forbidden": ["同时"]
+      "pass_criteria": ["The two states remain mutually exclusive choices and cockpit labels remain recognizable."],
+      "failure_conditions": ["The output implies both branches are performed."]
     },
     {
-      "id": "qrh_confirm_is_not_plain_verify",
+      "id": "qrh_confirm_before_action",
       "document_type": "QRH",
+      "coverage": ["qrh_action_state"],
+      "prompt": "Translate the checklist item without changing crew coordination.",
       "source": "Confirm X, then move X to Y.",
-      "expected": ["核实", "然后", "移至 Y"],
-      "forbidden": ["直接移至 Y"]
+      "pass_criteria": ["The confirmation remains a distinct step before the control movement."],
+      "failure_conditions": ["The control is moved without preserving the preceding confirmation."]
     },
     {
       "id": "qrh_verify_state_not_action",
       "document_type": "QRH",
+      "coverage": ["qrh_action_state"],
+      "prompt": "Translate the checklist item.",
       "source": "Verify X is in the closed position.",
-      "expected": ["核实 X", "关位"],
-      "forbidden": ["将 X 移至关位"]
+      "pass_criteria": ["The output asks the crew to verify an existing state."],
+      "failure_conditions": ["The output instructs the crew to move X to the closed position."]
     },
     {
-      "id": "qrh_plan_to_land_strength",
+      "id": "landing_urgency_strength",
       "document_type": "QRH",
-      "source": "Plan to land at the nearest suitable airport.",
-      "expected": ["计划", "最近合适机场着陆"],
-      "forbidden": ["立即着陆"]
+      "coverage": ["modal_strength"],
+      "prompt": "Translate both lines and preserve their different urgency.",
+      "source": "Plan to land at the nearest suitable airport. Land immediately.",
+      "pass_criteria": ["Planning and immediate action remain two different urgency levels."],
+      "failure_conditions": ["The two lines are normalized to the same urgency."]
     },
     {
-      "id": "qrh_immediate_landing_strength",
+      "id": "cockpit_label_preserved",
       "document_type": "QRH",
-      "source": "Land immediately.",
-      "expected": ["立即着陆"],
-      "forbidden": ["计划着陆", "尽快着陆"]
-    },
-    {
-      "id": "qrh_cockpit_label_preserved",
-      "document_type": "QRH",
+      "coverage": ["qrh_action_state"],
+      "prompt": "Translate the control instruction.",
       "source": "MODE selector — MAN.",
-      "expected": ["选择器", "MAN"],
-      "forbidden": ["自动"]
+      "pass_criteria": ["The selector and its MAN target state remain separately recognizable."],
+      "failure_conditions": ["The fixed cockpit label is replaced with an inferred mode."]
     },
     {
       "id": "indication_not_system_failure",
       "document_type": "QRH",
+      "coverage": ["no_addition", "qrh_action_state"],
+      "prompt": "Translate the source without inferring a cause.",
       "source": "X indication is inoperative.",
-      "expected": ["X 指示不工作"],
-      "forbidden": ["X 系统失效"]
+      "pass_criteria": ["Only the indication is described as inoperative."],
+      "failure_conditions": ["The output states that the whole X system has failed."]
     },
     {
       "id": "completion_exception_preserved",
       "document_type": "QRH",
+      "coverage": ["qrh_branching"],
+      "prompt": "Translate the completion line.",
       "source": "Checklist Complete Except Deferred Items.",
-      "expected": ["除延迟项目外", "检查单完成"],
-      "forbidden": ["全部项目均已完成"]
+      "pass_criteria": ["The completion status and the deferred-item exception are both retained."],
+      "failure_conditions": ["The output claims every item is complete."]
     },
     {
       "id": "cross_document_style_routing",
       "document_type": "mixed",
-      "source": "The FCTM explains why; the QRH item specifies what to do.",
-      "expected": ["训练说明保持解释性", "检查单项目保持指令结构"],
-      "forbidden": ["用训练说明改写检查单动作"]
+      "coverage": ["document_type_routing"],
+      "prompt": "Translate an explanatory FCTM paragraph followed by a QRH action item.",
+      "source": "The first passage explains why an action helps. The second specifies the action and target state.",
+      "pass_criteria": ["The training passage remains explanatory and the checklist item retains directive structure."],
+      "failure_conditions": ["The explanatory style weakens the checklist action or the checklist style strengthens the training recommendation."]
     },
     {
       "id": "chinese_reference_cannot_add_fact",
       "document_type": "revision",
-      "source": "The English source contains X; the Chinese reference contains X and Y.",
-      "expected": ["只保留 X", "Y 进入差异清单"],
-      "forbidden": ["把 Y 加入译文"]
+      "coverage": ["no_addition", "document_type_routing"],
+      "prompt": "Revise the Chinese translation using the English source as technical authority.",
+      "source": "The English source contains X. The Chinese reference contains X and an additional claim Y.",
+      "pass_criteria": ["The translated content contains X only, while Y is reported outside the translation as a discrepancy."],
+      "failure_conditions": ["Y is imported into the translated body."]
     },
     {
       "id": "qrh_layout_semantics",
       "document_type": "QRH",
-      "source": "Control name ... target state ... crew responsibility; continued on next page.",
-      "expected": ["控制件", "目标状态", "机组责任", "下页续"],
-      "forbidden": ["合并为无结构段落"]
+      "coverage": ["no_invented_structure", "no_invented_visual_semantics"],
+      "prompt": "Recreate the checklist item in DOCX.",
+      "source": "The source visually separates a control name, target state, crew responsibility, and a continuation marker.",
+      "pass_criteria": ["All four functions remain visually distinguishable without adding a new hierarchy."],
+      "failure_conditions": ["The item becomes an unstructured paragraph or receives a new warning level."]
+    },
+    {
+      "id": "fidelity_no_technical_addition",
+      "document_type": "FCTM",
+      "coverage": ["no_addition"],
+      "prompt": "Translate the sentence; a separate reference describes a plausible causal mechanism not stated here.",
+      "source": "This technique may improve directional control.",
+      "pass_criteria": ["Only the stated possible improvement is translated."],
+      "failure_conditions": ["The external causal mechanism, an operating limit, or a new recommendation is added."]
+    },
+    {
+      "id": "example_remains_example",
+      "document_type": "FCTM",
+      "coverage": ["example_scope"],
+      "prompt": "Translate a worked example followed by a general discussion.",
+      "source": "In this example, the airplane uses configuration X. The following paragraph discusses the technique generally.",
+      "pass_criteria": ["Configuration X remains scoped to the example."],
+      "failure_conditions": ["Configuration X is repeated as a general rule or recommendation."]
+    },
+    {
+      "id": "no_invented_headings_or_summary",
+      "document_type": "FCTM",
+      "coverage": ["no_invented_structure"],
+      "prompt": "Translate two ordinary source paragraphs into DOCX.",
+      "source": "The source has two paragraphs and no heading, list, summary, or table.",
+      "pass_criteria": ["The two-paragraph information structure is retained."],
+      "failure_conditions": ["A title, numbered list, summary box, mnemonic, or table is invented."]
+    },
+    {
+      "id": "no_invented_visual_warning",
+      "document_type": "layout",
+      "coverage": ["no_invented_visual_semantics"],
+      "prompt": "Create the Chinese DOCX for a monochrome source note.",
+      "source": "The source uses ordinary monochrome body text and has no warning box, special color, header, or footer.",
+      "pass_criteria": ["The output remains ordinary monochrome content with no added control information."],
+      "failure_conditions": ["Color, a warning box, header, footer, page number, or review banner is invented."]
+    },
+    {
+      "id": "source_doubt_outside_translation",
+      "document_type": "revision",
+      "coverage": ["source_doubt_reporting", "no_addition"],
+      "prompt": "Translate a source containing a likely cross-reference typo under SD-3.",
+      "source": "The source cites a figure number that appears inconsistent with the visible document.",
+      "pass_criteria": ["The body follows the source without a translator note; the doubt is raised at final confirmation and listed in the conversation delivery note."],
+      "failure_conditions": ["The figure number is silently corrected, the doubt is silently omitted, or a translator note is inserted into the translated body."]
+    },
+    {
+      "id": "limited_plaintext_review_notice",
+      "document_type": "layout",
+      "coverage": ["review_notice"],
+      "prompt": "The environment cannot create DOCX; deliver an accepted plain-text translation under SD-4.",
+      "source": "A short technical passage.",
+      "pass_criteria": ["The review notice appears at the end of a separate conversation delivery note, not inside the translation or its file."],
+      "failure_conditions": ["The notice is omitted entirely or inserted into the translated content."]
+    },
+    {
+      "id": "cjk_font_preflight",
+      "document_type": "layout",
+      "coverage": ["cjk_preflight"],
+      "prompt": "Prepare a DOCX when the requested Chinese font name exists in configuration but has not been rendered in this environment.",
+      "source": "Chinese body text with full-width punctuation, a negative value, and an English cockpit label.",
+      "pass_criteria": ["A rendered CJK smoke test is visually checked before full production, or the route is downgraded and reported."],
+      "failure_conditions": ["Font availability is assumed from its name and first discovered after full-document QA."]
+    },
+    {
+      "id": "stitched_source_overlap",
+      "document_type": "layout",
+      "coverage": ["stitched_overlap", "no_addition"],
+      "prompt": "Assess a long screenshot before translating it.",
+      "source": "Two stitched regions overlap; the upper image layer hides part of the following numbered section although the page boundary looks complete.",
+      "pass_criteria": ["Sequence continuity and layer overlap are checked; the obscured range is reported and translation of that range stops."],
+      "failure_conditions": ["The page is accepted because its outer boundary looks complete, or hidden text is reconstructed from context."]
     }
   ]
 }

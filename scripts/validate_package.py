@@ -39,10 +39,89 @@ EXPECTED_QRH_MODULES = {
 }
 ALLOWED_STATUS = {"已对齐", "等义对照", "风格候选", "冲突", "废弃"}
 ALLOWED_CONFIDENCE = {"高", "中", "低", "语境相关"}
+MAX_SKILL_BYTES = 12_000
+REQUIRED_EVAL_COVERAGE = {
+    "no_addition",
+    "example_scope",
+    "modal_strength",
+    "no_invented_structure",
+    "no_invented_visual_semantics",
+    "review_notice",
+    "cjk_preflight",
+    "stitched_overlap",
+    "source_doubt_reporting",
+    "qrh_branching",
+    "document_type_routing",
+}
 
 
 def reference_markdown() -> list[Path]:
     return sorted((ROOT / "references").rglob("*.md"))
+
+
+def entrypoint_quality() -> list[str]:
+    path = ROOT / "SKILL.md"
+    size = len(path.read_bytes())
+    problems: list[str] = []
+    if size > MAX_SKILL_BYTES:
+        problems.append(f"SKILL.md is too large for progressive disclosure: {size} > {MAX_SKILL_BYTES}")
+    required_links = {
+        "references/fidelity.md",
+        "references/standing_decisions.md",
+        "references/source_authority.md",
+        "references/preflight_review.md",
+        "references/docx_production.md",
+        "references/terminology_maintenance.md",
+    }
+    text = path.read_text(encoding="utf-8")
+    for link in sorted(required_links):
+        if link not in text:
+            problems.append(f"SKILL.md does not route to required reference: {link}")
+    return problems
+
+
+def workflow_invariants() -> list[str]:
+    required_markers = {
+        "SKILL.md": (
+            "不在启动时完整读取",
+            "原文疑点清单",
+            "Markdown／纯文本",
+        ),
+        "references/fidelity.md": (
+            "当前只有 SD-4 覆盖第 6 条的纸面部分",
+            "照译 + 报告",
+            "SD-2 取消了原有交付控制信息例外",
+        ),
+        "references/standing_decisions.md": (
+            "非术语长期决策的唯一记录",
+            "单次任务答复不得自动提升为长期决策",
+        ),
+        "references/preflight_review.md": (
+            "CJK 字体",
+            "拼接截图",
+            "对话中的独立“交付说明”",
+        ),
+        "references/docx_production.md": (
+            "单页烟雾测试",
+            "覆盖图层",
+            "逐页内容连续性检查",
+        ),
+        "references/revising_existing_translation.md": (
+            "正文照译且不加译注",
+            "原文疑点清单",
+        ),
+    }
+    problems: list[str] = []
+    for relative, markers in required_markers.items():
+        path = ROOT / relative
+        if not path.exists():
+            problems.append(f"missing workflow reference: {relative}")
+            continue
+        text = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in text:
+                problems.append(f"missing workflow invariant in {relative}: {marker}")
+    return problems
 
 
 def terminology_sources() -> list[Path]:
@@ -219,33 +298,58 @@ def eval_schema() -> list[str]:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as exc:
         return [f"invalid behavior eval file: {exc}"]
+    if payload.get("schema_version") != 2:
+        return ["behavior evals must use semantic schema_version 2"]
     cases = payload.get("cases")
-    if not isinstance(cases, list) or len(cases) < 10:
-        return ["behavior evals must contain at least 10 cases"]
+    if not isinstance(cases, list) or len(cases) < 18:
+        return ["behavior evals must contain at least 18 cases"]
     problems: list[str] = []
-    required_types = {"FCTM", "QRH", "mixed", "revision"}
+    required_types = {"FCTM", "QRH", "mixed", "revision", "layout"}
     found_types: set[str] = set()
+    found_coverage: set[str] = set()
     ids: set[str] = set()
     for index, case in enumerate(cases, 1):
         if not isinstance(case, dict):
             problems.append(f"behavior eval {index} is not an object")
             continue
-        missing = {"id", "document_type", "source", "expected", "forbidden"} - set(case)
+        missing = {
+            "id",
+            "document_type",
+            "coverage",
+            "prompt",
+            "source",
+            "pass_criteria",
+            "failure_conditions",
+        } - set(case)
         if missing:
             problems.append(f"behavior eval {index} missing: {', '.join(sorted(missing))}")
             continue
+        if "expected" in case or "forbidden" in case:
+            problems.append(f"behavior eval {index} uses deprecated exact-match fields")
         case_id = case["id"]
         if case_id in ids:
             problems.append(f"duplicate behavior eval id: {case_id}")
         ids.add(case_id)
         found_types.add(case["document_type"])
-        if not case["expected"] or not isinstance(case["expected"], list):
-            problems.append(f"behavior eval {case_id} has no expected checks")
-        if not isinstance(case["forbidden"], list):
-            problems.append(f"behavior eval {case_id} has invalid forbidden checks")
+        coverage = case["coverage"]
+        if not isinstance(coverage, list) or not coverage or not all(isinstance(x, str) and x for x in coverage):
+            problems.append(f"behavior eval {case_id} has invalid coverage")
+        else:
+            found_coverage.update(coverage)
+        if not isinstance(case["pass_criteria"], list) or not case["pass_criteria"]:
+            problems.append(f"behavior eval {case_id} has no semantic pass criteria")
+        if not isinstance(case["failure_conditions"], list) or not case["failure_conditions"]:
+            problems.append(f"behavior eval {case_id} has no failure conditions")
+        if not isinstance(case["prompt"], str) or not case["prompt"].strip():
+            problems.append(f"behavior eval {case_id} has no prompt")
+        if not isinstance(case["source"], str) or not case["source"].strip():
+            problems.append(f"behavior eval {case_id} has no source")
     missing_types = required_types - found_types
     if missing_types:
         problems.append(f"behavior evals missing document types: {', '.join(sorted(missing_types))}")
+    missing_coverage = REQUIRED_EVAL_COVERAGE - found_coverage
+    if missing_coverage:
+        problems.append(f"behavior evals missing coverage: {', '.join(sorted(missing_coverage))}")
     return problems
 
 
@@ -282,7 +386,9 @@ def semantic_distinctions() -> list[str]:
 
 def main() -> None:
     problems = (
-        topic_module_completeness()
+        entrypoint_quality()
+        + workflow_invariants()
+        + topic_module_completeness()
         + qrh_module_completeness()
         + markdown_links()
         + public_content()
