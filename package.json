@@ -1,0 +1,9 @@
+{
+  "name": "flight-doc-translate",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Local document tool dependencies",
+  "dependencies": {
+    "docx": "9.6.1"
+  }
+}

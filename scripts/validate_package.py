@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
@@ -244,17 +245,17 @@ def leakscan_keywords() -> tuple[Path | None, list[str]]:
     return path, words
 
 
-def public_content() -> list[str]:
+def public_content(require_keywords: bool = True) -> list[str]:
     problems: list[str] = []
     keyword_source, keywords = leakscan_keywords()
-    if keyword_source is None:
+    if keyword_source is None and require_keywords:
         problems.append(
             "operator-identity check did not run: no keyword file at "
-            f"{DEFAULT_LEAKSCAN_FILE}. Create it (one keyword per line), or set "
+            f"{os.environ.get(LEAKSCAN_ENV, str(DEFAULT_LEAKSCAN_FILE))}. Create it (one keyword per line), or set "
             f"{LEAKSCAN_ENV}=<path>. An empty file opts out explicitly."
         )
     for path in ROOT.rglob("*"):
-        if not path.is_file() or ".git" in path.parts:
+        if not path.is_file() or any(part in {".git", "node_modules", "__pycache__", ".venv"} for part in path.relative_to(ROOT).parts):
             continue
         if path.suffix.lower() in FORBIDDEN_SUFFIXES:
             problems.append(f"forbidden artifact: {path.relative_to(ROOT)}")
@@ -498,13 +499,17 @@ def semantic_distinctions() -> list[str]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--structural-only", action="store_true",
+                        help="CI/package check only; NOT a substitute for local private-keyword release checks")
+    args = parser.parse_args()
     problems = (
         entrypoint_quality()
         + workflow_invariants()
         + topic_module_completeness()
         + qrh_module_completeness()
         + markdown_links()
-        + public_content()
+        + public_content(require_keywords=not args.structural_only)
         + structured_table_schema()
         + terminology_conflicts()
         + semantic_distinctions()
@@ -523,7 +528,8 @@ def main() -> None:
     leakscan = (
         f"operator-identity keywords: {len(keywords)} (from {keyword_source})"
         if keywords
-        else f"operator-identity check: explicitly opted out via empty {keyword_source}"
+        else ("operator-identity check NOT run (structural-only)" if args.structural_only and keyword_source is None
+              else f"operator-identity check: explicitly opted out via empty {keyword_source}")
     )
     print(
         "package validation passed; "

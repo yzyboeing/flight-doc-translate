@@ -1,0 +1,27 @@
+name: Package checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned document library
+        run: npm ci --ignore-scripts
+      - name: Validate package
+        run: |
+          python3 scripts/validate_package.py --structural-only
+          python3 -m compileall -q scripts
+          node -e "require('./scripts/style_mono.js'); require('./scripts/style_boeing.js')"

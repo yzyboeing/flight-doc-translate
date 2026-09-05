@@ -8,3 +8,8 @@ outputs/
 references/private/
 __pycache__/
 *.pyc
+
+node_modules/
+__pycache__/
+*.pyc
+.venv/

@@ -13,7 +13,7 @@ python3 -c "import fitz"; which pdftoppm pdfimages               # ② 源 PDF �
 which soffice                                                     # ③ DOCX → 逐页图像
 ```
 
-**注意 ①**：本仓库不含 `package.json` 与 `node_modules`，在仓库目录直接 `require('docx')` 必然失败——这不代表环境缺依赖。用 `NODE_PATH` 指向已装该依赖的目录，或在任务工作目录 `npm install docx`。
+**注意 ①**：可使用本仓库 package.json 安装 docx，或用 NODE_PATH 指向环境中已安装的兼容依赖。先实测，不根据目录位置断言可用性。
 
 **第 ④ 项（CJK 字体）没有一行命令能测。** 必须按 `docx_production.md` 实际生成一页含中文、全角标点、负号、温度符号的烟雾测试，渲染成图像后**目视**确认无方框、缺字、错误回退。不得只看字体名或系统安装列表就下结论。
 
@@ -55,12 +55,12 @@ which soffice                                                     # ③ DOCX →
 ## 五、本仓库红线
 
 1. **本仓库是公开的。** 只保存工作流、短术语和抽象句式；**不得包含**源 PDF、抽取文本、页面图像、连续手册正文、具体运行限制值、组织身份、内部编号、机号、本地路径或文件哈希。
-2. **推送前跑 `python3 scripts/validate_package.py`。** 它包含组织身份检查，关键词表读取仓库外的 `~/.leakscan-keywords` 或 `FLIGHT_DOC_LEAKSCAN_KEYWORDS` 指定路径。**关键词表缺失时校验器会报错并非零退出——那是设计如此，不要绕过。**
+2. **推送前跑 `python3 scripts/validate_package.py`。** CI 的 `--structural-only` 仅覆盖包结构等公开检查，不替代本机完整发布检查。 它包含组织身份检查，关键词表读取仓库外的 `~/.leakscan-keywords` 或 `FLIGHT_DOC_LEAKSCAN_KEYWORDS` 指定路径。**关键词表缺失时校验器会报错并非零退出——那是设计如此，不要绕过。**
 3. **忠实性六条**以 `references/fidelity.md` 为准，此处不复述。违反任一条即为不合格译本。
 4. **原文疑点照译 + 报告**：疑似笔误、内部矛盾、错号一律照原文译，不加译注（SD-3），进终稿前确认与交付说明的「原文疑点清单」。**不得静默改正，也不得静默略过。**
 5. **译本不得作为运行依据。** 交付说明必须原样包含「本译文未经技术复核，仅供学习参考，不得作为运行依据。」按 SD-4 该声明不写入纸面，但交付说明中是硬约束。
 6. **改动能否持久，取决于环境，先确认再承诺**：
-   - **Codex（本机 `~/.codex/skills/flight-doc-translate/`）**：该目录既是 git 仓库也是 skill 加载目录，改动**跨会话持久生效**。按 `references/reference_ingestion.md` 第三阶段验证后可直接提交推送。
+   - **Codex（本机 `~/.codex/skills/flight-doc-translate/`）**：加载目录可能是安装副本、符号链接或 Git 检出，先实测；永久规则在正式仓库修改并验证发布，再从确定提交同步安装。修改副本不等于已发布。
    - **Claude 网页端（`/mnt/skills/…`）**：该目录的改动**只在当次会话有效**，不跨会话。规则变更须产出增补包由用户替换一次，**不得暗示会自动生效**。
    - 两个环境的副本会各自漂移。改完一侧后按 `reference_ingestion.md` 第三阶段第 4 条核对另一侧，不要假定已同步。
 7. **推送前先 `git fetch` 比对远端。**

@@ -9,7 +9,7 @@ description: "把 Boeing FOTB、FCTM、WINGTIPS、FSF ALAR、FAA/EASA 通告、�
 
 ## 启动与最高约束
 
-1. 同时读取并遵守 `pdf` 与 `documents` skill；保持源文件不变，中间文件放任务工作目录，最终文件放用户可访问的 `outputs/`。
+1. 环境中有 `pdf` 与 `documents` skill 时读取并使用；没有时按本包的能力自检确认等效的提取、编辑、渲染和图像检查工具。保持源文件不变，中间文件放任务工作目录，最终文件放用户可访问的 `outputs/`。工具名不通用，完成标准不降低。
 2. 每次任务完整读取：
    - [忠实性约束](references/fidelity.md)：内容最高优先级；
    - [长期决策记录](references/standing_decisions.md)：只保存用户明确确认且跨文档有效的非术语决策；两个确认关口不得重复询问已有结论；
