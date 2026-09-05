@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -222,6 +223,8 @@ def markdown_links() -> list[str]:
     for source in [ROOT / "README.md", ROOT / "SKILL.md", *reference_markdown()]:
         text = source.read_text(encoding="utf-8")
         for link in re.findall(r"\[[^\]]+\]\(([^)]+\.md)\)", text):
+            if link.startswith(('https://', 'http://')):
+                continue  # Local integrity check; remote reachability is a separate check.
             if not (source.parent / link).resolve().exists():
                 problems.append(f"broken link: {source.relative_to(ROOT)} -> {link}")
     return problems
@@ -243,6 +246,33 @@ def leakscan_keywords() -> tuple[Path | None, list[str]]:
         if line.strip() and not line.lstrip().startswith("#")
     ]
     return path, words
+
+
+def valid_distribution_metadata(path: Path) -> bool:
+    """Only verified Skill-source checksums are exempt, never source-document hashes."""
+    try:
+        data = json.loads(path.read_text())
+        if set(data) != {'schema_version', 'repository', 'commit', 'name', 'version',
+                         'visibility', 'builder_repository', 'builder_commit', 'files'}:
+            return False
+        if (data['schema_version'] != 1 or data['name'] != 'flight-doc-translate'
+                or data['repository'] != 'https://github.com/yzyboeing/flight-doc-translate'
+                or data['builder_repository'] != 'https://github.com/yzyboeing/flight-notes-toolkit'
+                or data['visibility'] != 'public'):
+            return False
+        if not all(re.fullmatch(r'[0-9a-f]{40}', data[k]) for k in ('commit', 'builder_commit')):
+            return False
+        if not re.fullmatch(r'\d+\.\d+\.\d+', data['version']) or not data['files']:
+            return False
+        for relative, digest in data['files'].items():
+            target = ROOT / relative
+            if (target.is_symlink() or not target.is_file() or not target.resolve().is_relative_to(ROOT.resolve())
+                    or not re.fullmatch(r'[0-9a-f]{64}', digest)
+                    or hashlib.sha256(target.read_bytes()).hexdigest() != digest):
+                return False
+        return True
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+        return False
 
 
 def public_content(require_keywords: bool = True) -> list[str]:
@@ -277,7 +307,7 @@ def public_content(require_keywords: bool = True) -> list[str]:
         if registry:
             problems.append(f"aircraft registry in {path.relative_to(ROOT)}: {registry.group(0)}")
         digest = SHA256_VALUE.search(text)
-        if digest:
+        if digest and not (path == ROOT / 'SOURCE.json' and valid_distribution_metadata(path)):
             problems.append(f"file hash in {path.relative_to(ROOT)}: {digest.group(0)}")
         byline = PERSONAL_BYLINE.search(text)
         if byline:

@@ -1,5 +1,7 @@
 # flight-doc-translate
 
+跨 AI 统一入口：[AI_INDEX.md](https://github.com/yzyboeing/flight-notes-toolkit/blob/main/AI_INDEX.md)。版本化 Skill 包使用本仓库 Releases 中的 `skill-vX.Y.Z` 标签；不要与配置版本混用。安装、环境检查与更新方式见 [分发说明](https://github.com/yzyboeing/flight-notes-toolkit/blob/main/DISTRIBUTION.md)。私有包及资料仍受本仓库的保密和授权边界约束。
+
 用于将英文航空技术资料翻译为来源忠实、术语一致、版式经过逐页检查的中文 DOCX，也可依据英文原文校订已有中文译稿。
 
 ## 核心特点

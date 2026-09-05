@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "name": "flight-doc-translate",
+  "version": "1.0.0",
+  "repository": "https://github.com/yzyboeing/flight-doc-translate",
+  "visibility": "public",
+  "root": ".",
+  "include": [
+    "SKILL.md",
+    "AGENTS.md",
+    "README.md",
+    "LICENSE",
+    "references/*",
+    "scripts/*",
+    "evals/*",
+    "tests/*",
+    "agents/*",
+    "package*.json"
+  ],
+  "prompt": [
+    "SKILL.md",
+    "AGENTS.md",
+    "references/*.md"
+  ],
+  "stages": {
+    "rules": [
+      "file:SKILL.md"
+    ],
+    "build": [
+      "bin:node",
+      "node:docx",
+      "py:PIL"
+    ],
+    "render": [
+      "bin:soffice",
+      "bin:pdftoppm",
+      "bin:pdfimages",
+      "py:fitz"
+    ]
+  },
+  "limitations": [
+    "Human technical review, CJK render inspection and original review gates remain required."
+  ],
+  "next_checks": []
+}
