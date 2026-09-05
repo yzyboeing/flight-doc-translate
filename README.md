@@ -14,6 +14,28 @@
 - 每份文档定稿并完成最终 QA 后，复盘术语、句式、歧义、版式和检查经验；只把经过验证、可复用且已脱敏的经验回写到 Skill，没有合格经验时不制造条目。
 - 保留原图、表格、警告层级、版权和出口管制标识，并对生成的 DOCX 做逐页渲染检查。
 
+## 工作系统设计
+
+本 Skill 按“微型 Harness”组织，入口只保留每次任务都必须知道的主干，细节按需加载：
+
+| 层 | 仓库中的实现 | 解决的问题 |
+|---|---|---|
+| 信息边界 | `SKILL.md` 的 `description` + `evals/trigger_cases.yaml` | 哪些真实说法应触发，哪些相邻任务不应误触发 |
+| 执行编排 | `SKILL.md` 五步流程 + `preflight_review.md` | 高风险翻译如何串联两次确认和内部 QA |
+| 参考状态 | `references/` 的文体、场景和系统路由 | 大量资料放在哪里、什么时候加载，避免整库进入上下文 |
+| 工具系统 | `scripts/` | 将裁图、配色、页面样式和包检查等重复动作固化 |
+| 失败恢复 | `SKILL.md` 的“异常与失败” | 缺资料、越界或执行失败时默认停在哪里，禁止假装成功 |
+| 评估观测 | `evals/` + `scripts/validate_package.py` | 如何检查触发、忠实性、文体路由、版式与失败行为 |
+
+## 验证
+
+```bash
+python3 scripts/validate_package.py
+python3 <skill-creator>/scripts/quick_validate.py .
+```
+
+`evals/trigger_cases.yaml` 保存真实口吻的应触发与不应触发用例；`evals/translation_cases.yaml` 保存语义、版式和失败恢复用例。评测按行为与失败条件判断，不要求输出固定措辞。实质改动应覆盖相应案例，并至少真实运行一次成功路径和一次故意破坏后的失败路径。
+
 ## FCTM 场景表达模块
 
 总入口是 [FCTM 中文用法路由](references/fctm_zh_usage.md)。八个模块分别覆盖：

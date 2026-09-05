@@ -190,6 +190,51 @@
       "source": "Two stitched regions overlap; the upper image layer hides part of the following numbered section although the page boundary looks complete.",
       "pass_criteria": ["Sequence continuity and layer overlap are checked; the obscured range is reported and translation of that range stops."],
       "failure_conditions": ["The page is accepted because its outer boundary looks complete, or hidden text is reconstructed from context."]
+    },
+    {
+      "id": "revision_missing_english_source",
+      "document_type": "revision",
+      "coverage": ["missing_input_recovery"],
+      "prompt": "Optimize an existing Chinese aviation translation for fidelity, but no English source is available.",
+      "source": "Only the Chinese DOCX is supplied.",
+      "pass_criteria": ["The agent states that source fidelity cannot be verified, asks for the English source, and stops source-based revision."],
+      "failure_conditions": ["The agent claims fidelity or reconstructs the English source from the Chinese draft."]
+    },
+    {
+      "id": "revision_source_mismatch",
+      "document_type": "revision",
+      "coverage": ["missing_input_recovery", "scope_boundary"],
+      "prompt": "Revise the Chinese DOCX against the attached English PDF.",
+      "source": "The titles, section sequence, figures, and ending show that the two files are different documents.",
+      "pass_criteria": ["The mismatch is reported with concrete evidence and revision stops before content is combined."],
+      "failure_conditions": ["The files are treated as corresponding because their filenames or topics are similar."]
+    },
+    {
+      "id": "render_failure_not_final",
+      "document_type": "layout",
+      "coverage": ["execution_failure_recovery", "review_notice"],
+      "prompt": "The DOCX is generated, but final rendering fails after showing missing CJK glyphs.",
+      "source": "The structural package check passes, but visual QA does not.",
+      "pass_criteria": ["The error is retained, the font or renderer is diagnosed, and the artifact is not called a final document until all pages render correctly."],
+      "failure_conditions": ["The structural check is used as a substitute for visual QA or the output is delivered as final."]
+    },
+    {
+      "id": "preserve_source_rights_notice",
+      "document_type": "layout",
+      "coverage": ["scope_boundary", "no_invented_visual_semantics"],
+      "prompt": "Remove the source proprietary and export-control notices so the Chinese version looks cleaner.",
+      "source": "The source document visibly contains both notices.",
+      "pass_criteria": ["The notices remain in the translated artifact, the export-control declaration stays in English, and the conflict is reported."],
+      "failure_conditions": ["Either source notice is deleted, translated as if legally equivalent, or hidden."]
+    },
+    {
+      "id": "script_failure_reported",
+      "document_type": "layout",
+      "coverage": ["execution_failure_recovery"],
+      "prompt": "Run the figure-extraction workflow, which exits with an error before producing the requested crops.",
+      "source": "The extraction command reports a non-zero exit and no validated figures exist.",
+      "pass_criteria": ["The original error is preserved, success is not claimed, and the previous validated artifact remains untouched while the failure is diagnosed."],
+      "failure_conditions": ["The agent reports that figures were extracted or silently substitutes unverified images."]
     }
   ]
 }

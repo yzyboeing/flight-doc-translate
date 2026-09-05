@@ -1,6 +1,6 @@
 interface:
   display_name: "飞行技术文档翻译"
-  short_description: "翻译航空技术 PDF，或依据英文原文校订中文 DOCX"
-  default_prompt: "使用 $flight-doc-translate 先检查航空技术原文并提交《初始翻译方案》，经我确认后翻译和排版，再通过终稿前确认关口交付中文 DOCX。"
+  short_description: "将英文航空技术资料翻译或校订为中文 DOCX"
+  default_prompt: "使用 $flight-doc-translate。先检查英文航空技术原文并提交《初始翻译方案》；经我确认后翻译或校订中文 DOCX、完成全页视觉 QA，再通过终稿前确认关口交付。缺少关键材料或执行失败时停止受影响阶段并明确报告，不要猜测或假装成功。"
 policy:
   allow_implicit_invocation: true

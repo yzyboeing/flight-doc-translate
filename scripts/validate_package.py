@@ -52,7 +52,11 @@ REQUIRED_EVAL_COVERAGE = {
     "source_doubt_reporting",
     "qrh_branching",
     "document_type_routing",
+    "missing_input_recovery",
+    "execution_failure_recovery",
+    "scope_boundary",
 }
+MIN_TRIGGER_CASES_PER_CLASS = 10
 
 
 def reference_markdown() -> list[Path]:
@@ -74,6 +78,26 @@ def entrypoint_quality() -> list[str]:
         "references/terminology_maintenance.md",
     }
     text = path.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        problems.append("SKILL.md must start with YAML frontmatter")
+    frontmatter_match = re.match(r"---\n(.*?)\n---\n", text, re.DOTALL)
+    if not frontmatter_match:
+        problems.append("SKILL.md has invalid or unterminated YAML frontmatter")
+    else:
+        frontmatter = frontmatter_match.group(1)
+        if not re.search(r"^name:\s+flight-doc-translate\s*$", frontmatter, re.MULTILINE):
+            problems.append("SKILL.md frontmatter name must match the skill directory")
+        description_match = re.search(r'^description:\s+"(.+)"\s*$', frontmatter, re.MULTILINE)
+        if not description_match:
+            problems.append("SKILL.md description must be a quoted single-line string")
+        else:
+            description = description_match.group(1)
+            if len(description) > 500:
+                problems.append(f"SKILL.md description is too long for discovery: {len(description)} > 500")
+            if not any(cue in description for cue in ("翻一下这份", "译成中文", "做成中文版")):
+                problems.append("SKILL.md description lacks a realistic positive trigger phrase")
+            if "不用于" not in description:
+                problems.append("SKILL.md description lacks an explicit negative boundary")
     for link in sorted(required_links):
         if link not in text:
             problems.append(f"SKILL.md does not route to required reference: {link}")
@@ -86,6 +110,10 @@ def workflow_invariants() -> list[str]:
             "不在启动时完整读取",
             "原文疑点清单",
             "Markdown／纯文本",
+            "## 异常与失败",
+            "不得声称成功",
+            "一次只问一个最关键问题",
+            "## 做完汇报",
         ),
         "references/fidelity.md": (
             "当前只有 SD-4 覆盖第 6 条的纸面部分",
@@ -353,6 +381,54 @@ def eval_schema() -> list[str]:
     return problems
 
 
+def trigger_eval_schema() -> list[str]:
+    path = ROOT / "evals" / "trigger_cases.yaml"
+    if not path.exists():
+        return ["missing trigger evals: evals/trigger_cases.yaml"]
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        return [f"invalid trigger eval file: {exc}"]
+    if payload.get("schema_version") != 1:
+        return ["trigger evals must use schema_version 1"]
+    cases = payload.get("cases")
+    if not isinstance(cases, list):
+        return ["trigger evals cases must be a list"]
+    problems: list[str] = []
+    ids: set[str] = set()
+    class_counts = {True: 0, False: 0}
+    for index, case in enumerate(cases, 1):
+        if not isinstance(case, dict):
+            problems.append(f"trigger eval {index} is not an object")
+            continue
+        missing = {"id", "prompt", "should_trigger", "reason"} - set(case)
+        if missing:
+            problems.append(f"trigger eval {index} missing: {', '.join(sorted(missing))}")
+            continue
+        case_id = case["id"]
+        if not isinstance(case_id, str) or not case_id:
+            problems.append(f"trigger eval {index} has invalid id")
+        elif case_id in ids:
+            problems.append(f"duplicate trigger eval id: {case_id}")
+        ids.add(case_id)
+        expected = case["should_trigger"]
+        if not isinstance(expected, bool):
+            problems.append(f"trigger eval {case_id} should_trigger must be boolean")
+        else:
+            class_counts[expected] += 1
+        if not isinstance(case["prompt"], str) or not case["prompt"].strip():
+            problems.append(f"trigger eval {case_id} has no prompt")
+        if not isinstance(case["reason"], str) or not case["reason"].strip():
+            problems.append(f"trigger eval {case_id} has no reason")
+    for expected, label in ((True, "positive"), (False, "negative")):
+        if class_counts[expected] < MIN_TRIGGER_CASES_PER_CLASS:
+            problems.append(
+                f"trigger evals need at least {MIN_TRIGGER_CASES_PER_CLASS} {label} cases; "
+                f"found {class_counts[expected]}"
+            )
+    return problems
+
+
 def semantic_distinctions() -> list[str]:
     sources = terminology_sources()
     translations: dict[str, str] = {}
@@ -396,6 +472,7 @@ def main() -> None:
         + terminology_conflicts()
         + semantic_distinctions()
         + eval_schema()
+        + trigger_eval_schema()
     )
     if problems:
         raise SystemExit("\n".join(problems))
@@ -403,7 +480,12 @@ def main() -> None:
         len(table_rows(path))
         for path in terminology_sources()
     )
-    print(f"package validation passed; terminology rows: {count}")
+    behavior_cases = len(json.loads((ROOT / "evals" / "translation_cases.yaml").read_text())["cases"])
+    trigger_cases = len(json.loads((ROOT / "evals" / "trigger_cases.yaml").read_text())["cases"])
+    print(
+        "package validation passed; "
+        f"terminology rows: {count}; behavior evals: {behavior_cases}; trigger evals: {trigger_cases}"
+    )
 
 
 if __name__ == "__main__":

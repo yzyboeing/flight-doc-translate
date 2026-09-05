@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "evaluation_method": "Evaluate skill selection from name and description only. Do not load SKILL.md before judging.",
+  "cases": [
+    {"id": "vague_translate_attachment", "prompt": "翻一下这份。附件是 Boeing FOTB PDF。", "should_trigger": true, "reason": "Vague translation request plus an English aviation technical document."},
+    {"id": "make_chinese_version", "prompt": "把这份英文 FCTM 做成中文版。", "should_trigger": true, "reason": "Existing English flight technical manual needs a Chinese version."},
+    {"id": "preserve_layout", "prompt": "这份 WINGTIPS 译成中文，尽量保持原排版。", "should_trigger": true, "reason": "Aviation translation with layout restoration."},
+    {"id": "revise_existing_docx", "prompt": "英文 PDF 是原文，帮我优化这份已经翻好的中文 DOCX。", "should_trigger": true, "reason": "English-source revision of an existing Chinese translation."},
+    {"id": "terminology_and_layout_revision", "prompt": "按原文校对这份湿滑跑道中文译稿，专业词汇和排版都优化。", "should_trigger": true, "reason": "Aviation terminology and layout revision against an English source."},
+    {"id": "alar_briefing_note", "prompt": "把这个 FSF ALAR Briefing Note 翻译成中文 Word。", "should_trigger": true, "reason": "Named aviation safety document and DOCX output."},
+    {"id": "faa_ac_translation", "prompt": "请把这份 FAA AC 通告做成中文参考译本。", "should_trigger": true, "reason": "Existing English aviation advisory circular translation."},
+    {"id": "easa_notice_translation", "prompt": "将附件里的 EASA 安全通告译成中文，图表保留。", "should_trigger": true, "reason": "Aviation notice translation with figures and tables."},
+    {"id": "accident_report_docx", "prompt": "把这份英文航空事故调查报告翻译并排成中文 DOCX。", "should_trigger": true, "reason": "Aviation accident report translation and document production."},
+    {"id": "explicit_skill_name", "prompt": "使用 flight-doc-translate 处理这个英文飞行技术 PDF。", "should_trigger": true, "reason": "Explicit invocation."},
+    {"id": "chinese_notes_reorganization", "prompt": "把我的 737 中文飞行理论笔记整理成便于复习的 Word。", "should_trigger": false, "reason": "This is Chinese study-note organization, not source-document translation."},
+    {"id": "training_ppt", "prompt": "按公司模板做一套滑跑道培训 PPT。", "should_trigger": false, "reason": "The requested artifact is a training slide deck."},
+    {"id": "concept_explanation", "prompt": "给我解释一下动态滑水和粘性滑水的区别。", "should_trigger": false, "reason": "Concept explanation without translating an existing document."},
+    {"id": "ordinary_email", "prompt": "帮我把这封航空公司的英文商务邮件翻译成中文。", "should_trigger": false, "reason": "Ordinary language translation, not an aviation technical document workflow."},
+    {"id": "aviation_pdf_summary_only", "prompt": "总结一下这份英文航空 PDF 的主要观点，不用翻译也不用做 Word。", "should_trigger": false, "reason": "Summary-only request explicitly excludes translation and DOCX."},
+    {"id": "self_written_chinese_article", "prompt": "润色我自己写的中文航空科普文章，没有英文原文。", "should_trigger": false, "reason": "Chinese writing polish without an English source."},
+    {"id": "ocr_only", "prompt": "只把这个扫描 PDF 的英文 OCR 提取出来。", "should_trigger": false, "reason": "Text extraction only, not translation."},
+    {"id": "generic_technical_manual", "prompt": "翻译这份数据库运维技术手册并保留排版。", "should_trigger": false, "reason": "Technical document is outside aviation."},
+    {"id": "current_rule_research", "prompt": "帮我查一下 FAA 现在对污染跑道的最新规定。", "should_trigger": false, "reason": "Current-rule research, not translation of a supplied document."},
+    {"id": "video_subtitles", "prompt": "下载这个飞行教学视频并制作中英双语字幕。", "should_trigger": false, "reason": "Video subtitle workflow."}
+  ]
+}
