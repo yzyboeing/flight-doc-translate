@@ -38,7 +38,12 @@
 
 ## 全页 QA
 
-使用 `documents` skill 的当前 `render_docx.py` 把 DOCX 渲染为逐页图像并实际查看全部页面。至少检查：
+把 DOCX 渲染为逐页图像并**实际查看全部页面**。两条等效路径，用可用的那条：
+
+- `documents` skill 的当前 `render_docx.py`（该 skill 可用时）；
+- LibreOffice + Poppler：`soffice --headless --convert-to pdf --outdir <dir> out.docx` 再 `pdftoppm -jpeg -r 85 out.pdf pg`。
+
+至少检查：
 
 - 中文字体无方框、缺字或错误回退；标题和正文无裁切、重叠、孤行；
 - 拼接或裁切图片没有覆盖相邻内容、重复条带、接缝错位或被遮挡段落；

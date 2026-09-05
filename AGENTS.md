@@ -4,15 +4,20 @@
 
 ## 一、先实测能力，不要假设
 
+对应 `preflight_review.md` 能力自检的四项：
+
 ```bash
-ls references/ scripts/                      # 能读文件？
-python3 scripts/validate_package.py          # 能跑 shell？
-python3 -c "import fitz"                     # PyMuPDF？
-which pdftoppm pdfimages soffice             # poppler + LibreOffice？
-node -e "require('docx')"                    # docx 渲染依赖？
+ls references/ scripts/ && python3 scripts/validate_package.py   # 能读能跑？
+NODE_PATH=<装有 docx 的 node_modules> node -e "require('docx')"   # ① DOCX 生成库
+python3 -c "import fitz"; which pdftoppm pdfimages               # ② 源 PDF 渲染
+which soffice                                                     # ③ DOCX → 逐页图像
 ```
 
-全过 → **完整路线**。缺任一项 → **受限路线**，按 `references/preflight_review.md` 的规定先向用户说明缺失能力和交付影响。
+**注意 ①**：本仓库不含 `package.json` 与 `node_modules`，在仓库目录直接 `require('docx')` 必然失败——这不代表环境缺依赖。用 `NODE_PATH` 指向已装该依赖的目录，或在任务工作目录 `npm install docx`。
+
+**第 ④ 项（CJK 字体）没有一行命令能测。** 必须按 `docx_production.md` 实际生成一页含中文、全角标点、负号、温度符号的烟雾测试，渲染成图像后**目视**确认无方框、缺字、错误回退。不得只看字体名或系统安装列表就下结论。
+
+四项全过 → **完整路线**。缺任一项 → **受限路线**，按 `preflight_review.md` 的规定先向用户说明缺失能力和交付影响。
 
 **永远不要编造执行结果。** 未做渲染目检就明说未做，并列出因此未覆盖的检查项。
 

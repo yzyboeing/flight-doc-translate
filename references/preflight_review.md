@@ -6,9 +6,9 @@
 
 每次任务开始实测，不沿用上次结果：
 
-1. 通过工作区依赖加载器取得当前工具路径，并确认 DOCX 生成库能否加载；
+1. 实测 DOCX 生成库能否加载。本仓库不含 `package.json` 与 `node_modules`，`require('docx')` 需要用 `NODE_PATH` 指向已安装该依赖的目录，或在任务工作目录先 `npm install docx`；不得因为「本机装过」就推定可加载。
 2. 源 PDF 能否用 Poppler、PyMuPDF 或等效工具渲染，图片能否处理；
-3. DOCX 能否通过 `documents` skill 的当前流程渲染为逐页图像；
+3. DOCX 能否渲染为逐页图像。**两条等效路径，用可用的那条**：环境提供 `documents` skill 时用其当前流程；否则用 LibreOffice + Poppler（`soffice --headless --convert-to pdf` → `pdftoppm -jpeg -r 85`）。两条都不可用才算本项失败。
 4. CJK 字体能否被生成和渲染链实际解析：按 [DOCX 制作与视觉 QA](docx_production.md) 生成一页中文烟雾测试并目视检查，不能只根据字体名称或系统安装列表推断。
 
 - **完整路线**：四项均通过，可制作 DOCX、提取或裁切原图并完成全页视觉 QA。
