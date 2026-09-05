@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -23,6 +24,29 @@ def main() -> int:
         Path.home() / "Library/Fonts",
     ]
     directories = [path.resolve() for path in candidates if path.is_dir()]
+
+    # macOS 26 起，PingFang / Songti 等中日韩字体移到可下载资产目录
+    # /System/Library/AssetsV2/com_apple_MobileAsset_Font*/，不在上面四个经典路径中。
+    # 只列经典路径会让 LibreOffice 解析不到任何中文字体，渲染出的 PDF 里
+    # 中文全部缺失——而版面、颜色、表格看起来都正常，目视很容易漏掉。
+    # 因此用 fc-list 反查实际持有中文字体的目录并一并加入。
+    try:
+        listing = subprocess.run(
+            ["fc-list", ":lang=zh", "file"],
+            capture_output=True, text=True, timeout=30, check=False,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        listing = ""
+    seen = {str(d) for d in directories}
+    for line in listing.splitlines():
+        path_text = line.split(":", 1)[0].strip()
+        if not path_text:
+            continue
+        parent = Path(path_text).parent
+        if parent.is_dir() and str(parent) not in seen:
+            seen.add(str(parent))
+            directories.append(parent)
+
     if not directories:
         parser.error("No macOS font directories were found")
 
