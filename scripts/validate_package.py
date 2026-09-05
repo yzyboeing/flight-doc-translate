@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -19,6 +20,10 @@ PERSONAL_BYLINE = re.compile(
     r"Translated\s+by|Proofread\s+by|Verified\s+by|编译\s*[/：:]|校对\s*[/：:]|审核\s*[/：:]",
     re.IGNORECASE,
 )
+# 组织身份关键词表刻意存放在本仓库之外：本仓库是公开的，把运营人名称
+# 硬编码进来等于用检查器泄漏它要防的东西。
+LEAKSCAN_ENV = "FLIGHT_DOC_LEAKSCAN_KEYWORDS"
+DEFAULT_LEAKSCAN_FILE = Path.home() / ".leakscan-keywords"
 EXPECTED_TOPIC_MODULES = {
     "chapter_1_general_information.md": 45,
     "chapter_2_ground_operations.md": 40,
@@ -221,14 +226,46 @@ def markdown_links() -> list[str]:
     return problems
 
 
+def leakscan_keywords() -> tuple[Path | None, list[str]]:
+    """读取仓库外的组织身份关键词表。
+
+    返回 (来源路径, 关键词列表)。来源不存在时返回 (None, [])，由调用方
+    报为问题——绝不静默当作通过。空文件视为显式声明"无需检查"。
+    """
+    override = os.environ.get(LEAKSCAN_ENV)
+    path = Path(override).expanduser() if override else DEFAULT_LEAKSCAN_FILE
+    if not path.is_file():
+        return None, []
+    words = [
+        line.strip()
+        for line in path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    return path, words
+
+
 def public_content() -> list[str]:
     problems: list[str] = []
+    keyword_source, keywords = leakscan_keywords()
+    if keyword_source is None:
+        problems.append(
+            "operator-identity check did not run: no keyword file at "
+            f"{DEFAULT_LEAKSCAN_FILE}. Create it (one keyword per line), or set "
+            f"{LEAKSCAN_ENV}=<path>. An empty file opts out explicitly."
+        )
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts:
             continue
         if path.suffix.lower() in FORBIDDEN_SUFFIXES:
             problems.append(f"forbidden artifact: {path.relative_to(ROOT)}")
         text = path.read_text(encoding="utf-8", errors="ignore")
+        for word in keywords:
+            if word in text:
+                problems.append(
+                    f"operator identity in {path.relative_to(ROOT)}: "
+                    f"keyword #{keywords.index(word) + 1} from {keyword_source}"
+                )
+                break
         match = ABSOLUTE_LOCAL_PATH.search(text)
         if match:
             problems.append(f"local path in {path.relative_to(ROOT)}: {match.group(0)}")
@@ -482,9 +519,16 @@ def main() -> None:
     )
     behavior_cases = len(json.loads((ROOT / "evals" / "translation_cases.yaml").read_text())["cases"])
     trigger_cases = len(json.loads((ROOT / "evals" / "trigger_cases.yaml").read_text())["cases"])
+    keyword_source, keywords = leakscan_keywords()
+    leakscan = (
+        f"operator-identity keywords: {len(keywords)} (from {keyword_source})"
+        if keywords
+        else f"operator-identity check: explicitly opted out via empty {keyword_source}"
+    )
     print(
         "package validation passed; "
-        f"terminology rows: {count}; behavior evals: {behavior_cases}; trigger evals: {trigger_cases}"
+        f"terminology rows: {count}; behavior evals: {behavior_cases}; "
+        f"trigger evals: {trigger_cases}; {leakscan}"
     )
 
 
